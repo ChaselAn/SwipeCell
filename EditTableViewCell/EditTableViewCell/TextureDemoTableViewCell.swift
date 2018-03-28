@@ -20,6 +20,7 @@ class TextureDemoTableViewCell: ASCellNode {
 
     private(set) var isActionShowing = false
     private var isHideSwiping = false
+    private var isPanning = false
 
     lazy var panGestureRecognizer: UIPanGestureRecognizer = {
         let gesture = UIPanGestureRecognizer(target: self, action: #selector(didPan))
@@ -98,17 +99,17 @@ class TextureDemoTableViewCell: ASCellNode {
 
         switch gesture.state {
         case .began:
+            isPanning = true
             stopAnimatorIfNeeded()
 
             originalX = frame.origin.x
 
             if !isActionShowing {
                 if gesture.velocity(in: target).x > 0 { return }
-                showActionsView()
                 isActionShowing = true
+                showActionsView()
             }
         case .changed:
-
 
             guard let actionsView = actionsView else { return }
 
@@ -127,6 +128,7 @@ class TextureDemoTableViewCell: ASCellNode {
 
         case .ended:
 
+            isPanning = false
             guard let actionsView = actionsView else {
                 reset()
                 return
@@ -163,6 +165,7 @@ class TextureDemoTableViewCell: ASCellNode {
     }
 
     private func hideSwipe(animated: Bool, completion: ((Bool) -> Void)? = nil) {
+        guard !isPanning else { return }
         guard isActionShowing else { return }
         guard !isHideSwiping else { return }
         isHideSwiping = true
@@ -300,6 +303,7 @@ extension TextureDemoTableViewCell: UIGestureRecognizerDelegate {
     override open func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
 
         let swipeCells = tableNode?.visibleNodes.flatMap({ $0 as? TextureDemoTableViewCell }).filter({ $0.isActionShowing || $0.isHideSwiping })
+
         if gestureRecognizer == panGestureRecognizer,
             let view = gestureRecognizer.view,
             let gestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer
