@@ -18,6 +18,7 @@ class ViewController: UIViewController {
 
         view.addSubnode(tableNode)
         tableNode.dataSource = self
+        tableNode.circle_swipeDelegate = self
 
     }
 
@@ -39,10 +40,48 @@ extension ViewController: ASTableDataSource {
     }
 
     func tableNode(_ tableNode: ASTableNode, nodeForRowAt indexPath: IndexPath) -> ASCellNode {
-        let cell = TextureDemoTableViewCell(tableNode: tableNode)
-        cell.tableNode = tableNode
+        let cell = TextureDemoCellNode(tableNode: tableNode)
         return cell
     }
+}
+
+extension ViewController: ASTableNodeSwipableDelegate {
+    public func swipe_tableNode(_ tableNode: ASTableNode, canEditRowAt indexPath: IndexPath) -> Bool {
+        return true
+    }
+
+    public func swipe_tableNode(_ tableNode: ASTableNode, editActionsOptionsForRowAt indexPath: IndexPath) -> [SwipedAction] {
+
+        guard let cell = tableNode.nodeForRow(at: indexPath) as? TextureDemoCellNode else { return [] }
+        let deleteAction = SwipedAction(title: "删除", backgroundColor: #colorLiteral(red: 1, green: 0.01568627451, blue: 0.3450980392, alpha: 1), titleColor: UIColor.white, titleFont: UIFont.systemFont(ofSize: 17, weight: .medium), preferredWidth: nil, handler: { [weak self] (_) in
+//            guard let strongSelf = self else { return }
+//            if indexPath.row >= strongSelf.conversations.count { return }
+//            strongSelf.conversations.remove(at: indexPath.row)
+//            strongSelf.tableNode.deleteRows(at: [indexPath], with: .automatic)
+//            Config.deleteConversationAction?(conversation)
+            cell.hideSwipe(animated: true)
+        })
+        deleteAction.needConfirm = .custom(title: "确认删除")
+
+        let markAction: SwipedAction
+
+        let markAsRead = SwipedAction(title: "标记未读", handler: { (_) in
+//            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.2, execute: {
+//                ConversationMarkUnreadCache.markUnread(conversationID: conversation.id, on: false)
+//                Config.markAllMessagesInConversationReadAction?(conversation)
+//            })
+            cell.hideSwipe(animated: true)
+        })
+        markAction = markAsRead
+
+        markAction.backgroundColor = #colorLiteral(red: 0.8117647059, green: 0.8117647059, blue: 0.8117647059, alpha: 1)
+        markAction.titleFont = UIFont.systemFont(ofSize: 17, weight: .medium)
+        markAction.horizontalMargin = 24
+        deleteAction.horizontalMargin = 24
+
+        return [markAction, deleteAction]
+    }
+
 }
 
 //    private lazy var tableView = DemoTableView()
