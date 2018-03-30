@@ -156,6 +156,9 @@ open class SwipableCellNode: ASCellNode {
                     strongSelf.reset()
                 }
             }
+        case .cancelled:
+            isPanning = false
+            hideSwipe(animated: false)
         default:
             break
         }
@@ -181,7 +184,9 @@ open class SwipableCellNode: ASCellNode {
                 self?.reset()
             }
         } else {
-            view.center = CGPoint(x: 0, y: view.center.y)
+            self.frame.origin = CGPoint(x: 0, y: self.frame.origin.y)
+
+            self.layoutIfNeeded()
             reset()
         }
     }
