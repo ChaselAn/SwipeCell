@@ -18,6 +18,8 @@
 		F1A6945F2068EA2800F70814 /* SwipeAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A6945E2068EA2800F70814 /* SwipeAnimator.swift */; };
 		F1A694622069E53000F70814 /* Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A694612069E53000F70814 /* Extension.swift */; };
 		F1B81A49206CF76900EBB056 /* TextureDemoCellNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1B81A48206CF76900EBB056 /* TextureDemoCellNode.swift */; };
+		F1B81A4B206DE65100EBB056 /* StateMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1B81A4A206DE65100EBB056 /* StateMachine.swift */; };
+		F1B81A4D206DE68500EBB056 /* PlusSwipableCellNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1B81A4C206DE68500EBB056 /* PlusSwipableCellNode.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +38,8 @@
 		F1A6945E2068EA2800F70814 /* SwipeAnimator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwipeAnimator.swift; sourceTree = "<group>"; };
 		F1A694612069E53000F70814 /* Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension.swift; sourceTree = "<group>"; };
 		F1B81A48206CF76900EBB056 /* TextureDemoCellNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureDemoCellNode.swift; sourceTree = "<group>"; };
+		F1B81A4A206DE65100EBB056 /* StateMachine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StateMachine.swift; sourceTree = "<group>"; };
+		F1B81A4C206DE68500EBB056 /* PlusSwipableCellNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlusSwipableCellNode.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -94,6 +98,8 @@
 				F1A6945E2068EA2800F70814 /* SwipeAnimator.swift */,
 				F1A694612069E53000F70814 /* Extension.swift */,
 				F1246FC1206CF4FA00B28E71 /* SwipableCellNode.swift */,
+				F1B81A4C206DE68500EBB056 /* PlusSwipableCellNode.swift */,
+				F1B81A4A206DE65100EBB056 /* StateMachine.swift */,
 				F1B81A48206CF76900EBB056 /* TextureDemoCellNode.swift */,
 				F1A694292068908B00F70814 /* Main.storyboard */,
 				F1A6942C2068908B00F70814 /* Assets.xcassets */,
@@ -241,8 +247,10 @@
 				F1A694622069E53000F70814 /* Extension.swift in Sources */,
 				F1A69438206891FC00F70814 /* DemoTableViewCell.swift in Sources */,
 				F1B81A49206CF76900EBB056 /* TextureDemoCellNode.swift in Sources */,
+				F1B81A4B206DE65100EBB056 /* StateMachine.swift in Sources */,
 				F1A6945F2068EA2800F70814 /* SwipeAnimator.swift in Sources */,
 				F1A694282068908B00F70814 /* ViewController.swift in Sources */,
+				F1B81A4D206DE68500EBB056 /* PlusSwipableCellNode.swift in Sources */,
 				F1A694262068908B00F70814 /* AppDelegate.swift in Sources */,
 				F1246FC2206CF4FA00B28E71 /* SwipableCellNode.swift in Sources */,
 			);
