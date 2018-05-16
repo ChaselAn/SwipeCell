@@ -1,65 +1,7 @@
-//
-//  PlusSwipableCellNode.swift
-//  EditTableViewCell
-//
-//  Created by ancheng on 2018/3/30.
-//  Copyright © 2018年 ancheng. All rights reserved.
-//
-
 import UIKit
 import AsyncDisplayKit
 
 open class PlusSwipableCellNode: ASCellNode {
-
-    enum State {
-        case showed
-        case hid
-        case hiding
-        case showing
-        case moving
-    }
-
-    enum Transition {
-//        case panning
-        case willPan
-        case panned
-        case tap
-        case animate
-        case hideToEdge
-    }
-
-    lazy var stateMachine: StateMachine<State, Transition> = {
-        let stateMachine = StateMachine<State, Transition>()
-
-//        stateMachine.add(state: .showed, entryOperation: {
-//
-//        })
-        stateMachine.add(state: .hid, entryOperation: { [weak self] in
-            self?.reset()
-        })
-//        stateMachine.add(state: .hiding, entryOperation: { [weak self] in
-//
-//        })
-
-        stateMachine.add(transition: .willPan, fromState: .hid, toState: .moving)
-        stateMachine.add(transition: .hideToEdge, fromState: .moving, toState: .hid)
-        stateMachine.add(transition: .panned, fromState: .moving, toState: .hiding)
-        stateMachine.add(transition: .panned, fromState: .moving, toState: .showing)
-        stateMachine.add(transition: .animate, fromState: .hiding, toState: .hid)
-        stateMachine.add(transition: .animate, fromState: .showing, toState: .showed)
-        stateMachine.add(transition: .willPan, fromState: .showed, toState: .moving)
-        stateMachine.add(transition: .tap, fromState: .showed, toState: .hiding)
-
-//        stateMachine.add(state: .off) { [weak self] in
-//            self?.statusBarStyle = .lightContent
-//            self?.view.backgroundColor = .black
-//            self?.promptLabel.textColor = .white
-//            self?.promptLabel.text = "Tap to turn lights on"
-//        }
-
-        stateMachine.initialState = .hid
-        return stateMachine
-    }()
 
     public var scale: CGFloat = 0.75
 
@@ -71,6 +13,9 @@ open class PlusSwipableCellNode: ASCellNode {
     private var isHideSwiping = false
     private var isPanning = false
     private var animator: SwipeAnimator?
+
+    private let head = SwipableHead()
+    private let actionHead = SwipableActionHead()
 
     private lazy var panGestureRecognizer: UIPanGestureRecognizer = {
         let gesture = UIPanGestureRecognizer(target: self, action: #selector(didPan))
@@ -97,6 +42,38 @@ open class PlusSwipableCellNode: ASCellNode {
 
         tableNode.view.panGestureRecognizer.removeTarget(self, action: nil)
         tableNode.view.panGestureRecognizer.addTarget(self, action: #selector(tableViewDidPan))
+
+        head.brain.subscribe { [weak self] (command) in
+            guard let strongSelf = self else { return }
+            switch command {
+            case .beginPan(let panGesture):
+                strongSelf.beginPan(panGesture: panGesture)
+            case .panning(let panGesture):
+                strongSelf.panning(panGesture: panGesture)
+            case .panned(let panGestrue):
+                strongSelf.panned(panGesture: panGestrue)
+            case .panCancel:
+                strongSelf.panCancel()
+            }
+        }
+
+        actionHead.brain.subscribe { [weak self] (command) in
+            guard let strongSelf = self else { return }
+            switch command {
+            case .show:
+                strongSelf.showActionsView()
+            case .setProgress(let offsetX):
+                guard let actionsView = strongSelf.actionsView else { return }
+                let progress = abs(offsetX) / actionsView.preferredWidth
+                if !actionsView.isConfirming {
+                    actionsView.setProgress(progress)
+                }
+            case .reset:
+                strongSelf.reset()
+            case .hide(let animated, let completion):
+                strongSelf.hideSwipeCommand(animated: animated, completion: completion)
+            }
+        }
     }
 
     public required init?(coder aDecoder: NSCoder) {
@@ -116,118 +93,171 @@ open class PlusSwipableCellNode: ASCellNode {
         tableNode?.view.panGestureRecognizer.removeTarget(self, action: nil)
     }
 
-    @objc private func didPan(gesture: UIPanGestureRecognizer) {
+    public func hideSwipe(animated: Bool, completion: ((Bool) -> Void)? = nil) {
+        actionHead.brain.dispatch(.hide(animated, completion))
+    }
 
-        guard let target = gesture.view else { return }
+    @objc private func didPan(gesture: UIPanGestureRecognizer) {
 
         switch gesture.state {
         case .began:
-
+            head.brain.dispatch(.beginPan(gesture))
 //            isPanning = true
-            stopAnimatorIfNeeded()
+//            stopAnimatorIfNeeded()
+//
+//            originalX = frame.origin.x
 
-            originalX = frame.origin.x
-
-            if stateMachine.currentState == .hid {
-                if gesture.velocity(in: target).x > 0 { return }
+//            if !isActionShowing {
+//                if gesture.velocity(in: target).x > 0 { return }
 //                isActionShowing = true
-                showActionsView()
-            }
-            stateMachine.fire(transition: .willPan)
-
+//                showActionsView()
+//            }
         case .changed:
-
-            guard let actionsView = actionsView, let tableNode = tableNode else { return }
-
-            let translationX = gesture.translation(in: target).x * scale
-            var offsetX = originalX + translationX
-            if offsetX > 0 {
-                target.frame.origin.x = 0
-            } else {
-                if offsetX < -tableNode.bounds.width * 3 {
-                    offsetX = -tableNode.bounds.width * 3
-                }
-                target.frame.origin.x = offsetX
-                let progress = abs(offsetX) / actionsView.preferredWidth
-
-                if !actionsView.isConfirming {
-                    actionsView.setProgress(progress)
-                }
-            }
+            head.brain.dispatch(.panning(gesture))
+//            guard let actionsView = actionsView, let tableNode = tableNode else { return }
+//
+//            let translationX = gesture.translation(in: target).x * scale
+//            var offsetX = originalX + translationX
+//            if offsetX > 0 {
+//                target.frame.origin.x = 0
+//            } else {
+//                if offsetX < -tableNode.bounds.width * 3 {
+//                    offsetX = -tableNode.bounds.width * 3
+//                }
+//                target.frame.origin.x = offsetX
+//                let progress = abs(offsetX) / actionsView.preferredWidth
+//
+//                if !actionsView.isConfirming {
+//                    actionsView.setProgress(progress)
+//                }
+//            }
 
         case .ended:
 
-            isPanning = false
-            guard let actionsView = actionsView else {
-                reset()
-                return
-            }
-            let translationX = gesture.translation(in: target).x * scale
-            if originalX + translationX >= 0 {
-                if stateMachine.currentState == .hiding {
-                    stateMachine.fire(transition: .animate)
-                }
-                return
-            }
-
-            let offSetX = translationX < 0 ? -actionsView.preferredWidth : 0
-            let velocity = gesture.velocity(in: target)
-
-            let distance = -frame.origin.x
-            let normalizedVelocity = velocity.x / distance
-
-            animate(duration: 0.4, toOffset: offSetX, withInitialVelocity: normalizedVelocity * 0.4, isConfirming: actionsView.isConfirming) { [weak self] _ in
-                guard let strongSelf = self else { return }
+            head.brain.dispatch(.panned(gesture))
+//            isPanning = false
+//            guard let actionsView = actionsView else {
+//                reset()
+//                return
+//            }
+//            let translationX = gesture.translation(in: target).x * scale
+//            if originalX + translationX >= 0 {
+//                reset()
+//                return
+//            }
+//
+//            let offSetX = translationX < 0 ? -actionsView.preferredWidth : 0
+//            let velocity = gesture.velocity(in: target)
+//
+//            let distance = -frame.origin.x
+//            let normalizedVelocity = velocity.x / distance
+//
+//            animate(duration: 0.4, toOffset: offSetX, withInitialVelocity: normalizedVelocity * 0.4, isConfirming: actionsView.isConfirming) { [weak self] _ in
+//                guard let strongSelf = self else { return }
 //                if strongSelf.isActionShowing && translationX >= 0 {
 //                    strongSelf.reset()
 //                }
-                if strongSelf.stateMachine.currentState == .hiding, translationX >= 0 {
-                    strongSelf.stateMachine.fire(transition: .animate)
-                }
-
-            }
+//            }
         case .cancelled:
-            isPanning = false
-            hideSwipe(animated: false)
+            head.brain.dispatch(.panCancel)
+//            isPanning = false
+//            hideSwipe(animated: false)
         default:
             break
         }
     }
 
     @objc private func didTap(gesture: UITapGestureRecognizer) {
-        hideSwipe(animated: true)
+        actionHead.brain.dispatch(.hide(true, nil))
+//        hideSwipe(animated: true)
     }
 
     @objc private func tableViewDidPan(gesture: UIPanGestureRecognizer) {
-        hideSwipe(animated: true)
+        actionHead.brain.dispatch(.hide(true, nil))
+//        hideSwipe(animated: true)
     }
 
-    public func hideSwipe(animated: Bool, completion: ((Bool) -> Void)? = nil) {
-        guard !isPanning else { return }
-        guard isActionShowing else { return }
-        guard !isHideSwiping else { return }
-        isHideSwiping = true
-        isActionShowing = false
-        if animated {
-            animate(duration: 0.5, toOffset: 0, isConfirming: actionsView?.isConfirming == true, fromHideAction: true) { [weak self] complete in
-                completion?(complete)
-                self?.reset()
-            }
-        } else {
-            self.frame.origin = CGPoint(x: 0, y: self.frame.origin.y)
+//    public func hideSwipe(animated: Bool, completion: ((Bool) -> Void)? = nil) {
+//        guard !isPanning else { return }
+//        guard isActionShowing else { return }
+//        guard !isHideSwiping else { return }
+//        isHideSwiping = true
+//        isActionShowing = false
+//        if animated {
+//            animate(duration: 0.5, toOffset: 0, isConfirming: actionsView?.isConfirming == true, fromHideAction: true) { [weak self] complete in
+//                completion?(complete)
+//                self?.actionHead.brain.dispatch(.reset)
+//            }
+//        } else {
+//            self.frame.origin = CGPoint(x: 0, y: self.frame.origin.y)
+//
+//            self.layoutIfNeeded()
+//            actionHead.brain.dispatch(.reset)
+//        }
+//    }
+}
 
-            self.layoutIfNeeded()
-            reset()
+// MARK: - handle head command
+extension PlusSwipableCellNode {
+
+    private func beginPan(panGesture: UIPanGestureRecognizer) {
+        stopAnimatorIfNeeded()
+        originalX = frame.origin.x
+        guard let target = panGesture.view else { return }
+        if panGesture.velocity(in: target).x > 0 { return }
+        actionHead.brain.dispatch(.show)
+    }
+
+    private func panning(panGesture: UIPanGestureRecognizer) {
+        guard let tableNode = tableNode else { return }
+        guard let target = panGesture.view else { return }
+        let translationX = panGesture.translation(in: target).x * scale
+        var offsetX = originalX + translationX
+        if offsetX > 0 {
+            target.frame.origin.x = 0
+        } else {
+            if offsetX < -tableNode.bounds.width * 3 {
+                offsetX = -tableNode.bounds.width * 3
+            }
+            target.frame.origin.x = offsetX
+            actionHead.brain.dispatch(.setProgress(offsetX))
         }
     }
 
-    private func reset() {
-        isActionShowing = false
-        clipsToBounds = false
-        isHideSwiping = false
-        actionsView?.removeFromSuperview()
-        actionsView = nil
+    private func panned(panGesture: UIPanGestureRecognizer) {
+        guard let actionsView = actionsView else {
+            actionHead.brain.dispatch(.reset)
+            return
+        }
+        guard let target = panGesture.view else { return }
+        let translationX = panGesture.translation(in: target).x * scale
+        if originalX + translationX >= 0 {
+            actionHead.brain.dispatch(.reset)
+            return
+        }
+
+        let offSetX = translationX < 0 ? -actionsView.preferredWidth : 0
+        let velocity = panGesture.velocity(in: target)
+
+        let distance = -frame.origin.x
+        let normalizedVelocity = velocity.x / distance
+
+        animate(duration: 0.4, toOffset: offSetX, withInitialVelocity: normalizedVelocity * 0.4, isConfirming: actionsView.isConfirming) { [weak self] _ in
+            guard let strongSelf = self else { return }
+
+            if strongSelf.actionHead.brain.state == .showing && translationX >= 0 {
+                strongSelf.actionHead.brain.dispatch(.reset)
+            }
+        }
     }
+
+    private func panCancel() {
+        actionHead.brain.dispatch(.hide(false, nil))
+    }
+}
+
+// MARK: - handle actionHead command
+extension PlusSwipableCellNode {
 
     @discardableResult
     private func showActionsView() -> Bool {
@@ -270,6 +300,29 @@ open class PlusSwipableCellNode: ASCellNode {
         self.actionsView = actionsView
 
         return true
+    }
+
+    private func reset() {
+        //        isActionShowing = false
+        clipsToBounds = false
+        //        isHideSwiping = false
+        actionsView?.removeFromSuperview()
+        actionsView = nil
+    }
+
+    private func hideSwipeCommand(animated: Bool, completion: ((Bool) -> Void)? = nil) {
+        guard head.brain.state != .panning else { return }
+        if animated {
+            animate(duration: 0.5, toOffset: 0, isConfirming: actionsView?.isConfirming == true, fromHideAction: true) { [weak self] complete in
+                completion?(complete)
+                self?.actionHead.brain.dispatch(.reset)
+            }
+        } else {
+            self.frame.origin = CGPoint(x: 0, y: self.frame.origin.y)
+
+            self.layoutIfNeeded()
+            actionHead.brain.dispatch(.reset)
+        }
     }
 
     private func animate(duration: Double = 0.7, toOffset offset: CGFloat, withInitialVelocity velocity: CGFloat = 0, isConfirming: Bool = false, fromHideAction: Bool = false, completion: ((Bool) -> Void)? = nil) {
@@ -334,19 +387,22 @@ extension PlusSwipableCellNode: UIGestureRecognizerDelegate {
 
     override open func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
 
-        let swipeCells = tableNode?.visibleNodes.flatMap({ $0 as? SwipableCellNode }).filter({ $0.isActionShowing || $0.isHideSwiping })
+        let swipeCells = tableNode?.visibleNodes.compactMap({ $0 as? PlusSwipableCellNode }).filter({ $0.actionHead.brain.state == .showing || $0.actionHead.brain.state == .hiding })
         if gestureRecognizer == panGestureRecognizer,
             let view = gestureRecognizer.view,
             let gestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer {
-            if !isActionShowing {
+            if actionHead.brain.state != .showing {
                 swipeCells?.forEach({ $0.hideSwipe(animated: true) })
             }
+//            if !isActionShowing {
+//                swipeCells?.forEach({ $0.hideSwipe(animated: true) })
+//            }
             let translation = gestureRecognizer.translation(in: view)
             return abs(translation.y) <= abs(translation.x)
         }
 
         if gestureRecognizer == tapGestureRecognizer {
-            if isActionShowing {
+            if actionHead.brain.state == .showing {
                 return true
             }
             if swipeCells?.count != 0 {

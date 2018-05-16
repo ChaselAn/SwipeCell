@@ -304,7 +304,7 @@ extension SwipableCellNode: UIGestureRecognizerDelegate {
 
     override open func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
 
-        let swipeCells = tableNode?.visibleNodes.flatMap({ $0 as? SwipableCellNode }).filter({ $0.isActionShowing || $0.isHideSwiping })
+        let swipeCells = tableNode?.visibleNodes.compactMap({ $0 as? SwipableCellNode }).filter({ $0.isActionShowing || $0.isHideSwiping })
         if gestureRecognizer == panGestureRecognizer,
             let view = gestureRecognizer.view,
             let gestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer {

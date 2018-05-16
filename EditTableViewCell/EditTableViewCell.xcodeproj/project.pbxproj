@@ -20,6 +20,7 @@
 		F1B81A49206CF76900EBB056 /* TextureDemoCellNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1B81A48206CF76900EBB056 /* TextureDemoCellNode.swift */; };
 		F1B81A4B206DE65100EBB056 /* StateMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1B81A4A206DE65100EBB056 /* StateMachine.swift */; };
 		F1B81A4D206DE68500EBB056 /* PlusSwipableCellNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1B81A4C206DE68500EBB056 /* PlusSwipableCellNode.swift */; };
+		F1BCE8B820AAD88C00166590 /* SwipableHead.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1BCE8B720AAD88C00166590 /* SwipableHead.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,6 +41,7 @@
 		F1B81A48206CF76900EBB056 /* TextureDemoCellNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureDemoCellNode.swift; sourceTree = "<group>"; };
 		F1B81A4A206DE65100EBB056 /* StateMachine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StateMachine.swift; sourceTree = "<group>"; };
 		F1B81A4C206DE68500EBB056 /* PlusSwipableCellNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlusSwipableCellNode.swift; sourceTree = "<group>"; };
+		F1BCE8B720AAD88C00166590 /* SwipableHead.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipableHead.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -100,6 +102,7 @@
 				F1246FC1206CF4FA00B28E71 /* SwipableCellNode.swift */,
 				F1B81A4C206DE68500EBB056 /* PlusSwipableCellNode.swift */,
 				F1B81A4A206DE65100EBB056 /* StateMachine.swift */,
+				F1BCE8B720AAD88C00166590 /* SwipableHead.swift */,
 				F1B81A48206CF76900EBB056 /* TextureDemoCellNode.swift */,
 				F1A694292068908B00F70814 /* Main.storyboard */,
 				F1A6942C2068908B00F70814 /* Assets.xcassets */,
@@ -252,6 +255,7 @@
 				F1A694282068908B00F70814 /* ViewController.swift in Sources */,
 				F1B81A4D206DE68500EBB056 /* PlusSwipableCellNode.swift in Sources */,
 				F1A694262068908B00F70814 /* AppDelegate.swift in Sources */,
+				F1BCE8B820AAD88C00166590 /* SwipableHead.swift in Sources */,
 				F1246FC2206CF4FA00B28E71 /* SwipableCellNode.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
