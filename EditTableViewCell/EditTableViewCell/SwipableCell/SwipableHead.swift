@@ -55,6 +55,12 @@ class SwipableActionHead {
     typealias HideCompletion = (Bool) -> Void
     typealias HideAnimated = Bool
     typealias ActionViewOffsetX = CGFloat
+    typealias AnimationDuration = Double
+    typealias IsConfirming = Bool
+    typealias AnimationCompletion = (Bool) -> Void
+    typealias AnimationToOffsetX = CGFloat
+    typealias AnimationInitialVelocity = CGFloat
+    typealias IsFromHideAction = Bool
 
     enum State {
         case showing
@@ -67,35 +73,50 @@ class SwipableActionHead {
         case setProgress(ActionViewOffsetX)
         case reset
         case hide(HideAnimated, HideCompletion?)
+        case hideAnimate(AnimationDuration, IsConfirming, IsFromHideAction, AnimationCompletion?)
+        case showAnimate(IsConfirming, AnimationToOffsetX, AnimationInitialVelocity, AnimationCompletion?)
     }
 
-    enum Command {
-        case show
-        case setProgress(ActionViewOffsetX)
-        case reset
-        case hide(HideAnimated, HideCompletion?)
-    }
+//    enum Command {
+//        case show
+//        case setProgress(ActionViewOffsetX)
+//        case reset
+//        case hide(HideAnimated, HideCompletion?)
+//        case hideAnimate(AnimationDuration, IsConfirming, AnimationCompletion?)
+//        case showAnimate
+//    }
 
-    private(set) lazy var brain = Brain<State, Message, Command>(state: .hidden) { [unowned self] (state, message) -> (State, Command?) in
+    private(set) lazy var brain = Brain<State, Message, Message>(state: .hidden) { [unowned self] (state, message) -> (State, Message?) in
         let nextState: State
-        var command: Command?
+        var command: Message? = message
         switch message {
         case .show:
             nextState = .showing
-            command = .show
+//            command = .show
         case .setProgress(let offsetX):
             nextState = .showing
-            command = .setProgress(offsetX)
+//            command = .setProgress(offsetX)
         case .reset:
             nextState = .hidden
-            command = .reset
+//            command = .reset
         case .hide(let animated, let completion):
             if state == .showing {
                 nextState = .hiding
-                command = .hide(animated, completion)
+//                command = .hide(animated, completion)
             } else {
                 nextState = state
+                command = nil
             }
+        case .hideAnimate(_, _, let fromHideAction, _):
+            if fromHideAction {
+                nextState = .hiding
+            } else {
+                nextState = .hidden
+            }
+//            command = .hideAnimate()
+        case .showAnimate:
+            nextState = .showing
+//            command = .showAnimate
         }
         return (nextState, command)
     }

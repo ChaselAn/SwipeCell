@@ -7,13 +7,14 @@
 //
 
 import UIKit
-//
-//public protocol SwipeTableViewCellDelegate {
-//    func swipe_tableView(_ tableView: UITableView, editActionsOptionsForRowAt indexPath: IndexPath) -> [SwipedAction]
-//
-//    func swipe_tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool
-//}
-//
+import AsyncDisplayKit
+
+public protocol SwipeTableViewCellDelegate {
+    func swipe_tableView(_ tableView: UITableView, editActionsOptionsForRowAt indexPath: IndexPath) -> [SwipedAction]
+
+    func swipe_tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool
+}
+
 //public class SwipedAction {
 //
 //    public enum ConfirmStyle {
@@ -46,15 +47,22 @@ import UIKit
 
 extension String {
 
-//    func getHeight(maxWidth: CGFloat, attributes: [NSAttributedStringKey: Any]?) -> CGFloat {
-//
-//        let size = CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude)
-//        let rect = (self as NSString).boundingRect(with: size, options: .usesLineFragmentOrigin, attributes: attributes, context: nil)
-//
-//        return rect.size.height
-//    }
-
     func getWidth(withFont font: UIFont) -> CGFloat {
         return (self as NSString).size(withAttributes: [.font: font]).width + 1
     }
+}
+
+extension ASTableNode {
+
+    private static var circle_swipeDelegateKey: Character!
+
+    public weak var circle_swipeDelegate: ASTableNodeSwipableDelegate? {
+        set {
+            objc_setAssociatedObject(self, &ASTableNode.circle_swipeDelegateKey, newValue, .OBJC_ASSOCIATION_RETAIN)
+        }
+        get {
+            return objc_getAssociatedObject(self, &ASTableNode.circle_swipeDelegateKey) as? ASTableNodeSwipableDelegate
+        }
+    }
+
 }

@@ -9,7 +9,7 @@
 import UIKit
 import AsyncDisplayKit
 
-class TextureDemoCellNode: PlusSwipableCellNode {
+class TextureDemoCellNode: SwipableCellNode {
 
     let textNode = ASTextNode()
 
